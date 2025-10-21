@@ -1,6 +1,6 @@
 # Datadog Integration with Ubuntu EC2
 
-A technical guide for installing Datadog Agent on Ubuntu EC2, monitoring CPU metrics, and configuring alerts.
+A technical guide for installing Datadog Agent on Ubuntu EC2, monitoring CPU metrics, and configuring alerts, and identifying the high CPU process.
 
 ## Prerequisites
 
@@ -48,6 +48,37 @@ sudo nano /etc/datadog-agent/datadog.yaml
 # hostname: my-ec2-instance
 
 # Restart agent
+sudo systemctl restart datadog-agent
+```
+
+## Enable Process Agent
+
+The Datadog Process Agent collects detailed process metrics. It's included with the Agent but needs to be enabled.
+
+### Edit Datadog Configuration
+
+```bash
+# Edit main configuration file
+sudo nano /etc/datadog-agent/datadog.yaml
+```
+
+Add or modify these settings:
+
+```yaml
+# Enable process collection
+process_config:
+  enabled: "true"
+
+# Optional: Configure process discovery
+process_dd_url: https://process.datadoghq.com
+
+# Enable container process collection (if using Docker)
+container_collect_all: true
+```
+
+### Restart Datadog Agent
+
+```bash
 sudo systemctl restart datadog-agent
 ```
 
@@ -112,38 +143,15 @@ This enables the built-in “Process Check” for the Agent.
 ![alt text](image-3.png)
 
 ![alt text](image-5.png)
-### Monitor Configuration Details
 
-| Parameter | Value | Description |
-|-----------|-------|-------------|
-| **Metric** | `system.cpu.user` | User CPU usage percentage |
-| **Threshold** | `> 80` | Alert when CPU exceeds 80% |
-| **Evaluation Window** | `last_5m` | Average over 5 minutes |
-| **Notification** | Email | Sends to specified email address |
 
-### Email Notification Format
+![alt text](image-6.png)
 
-Replace `your-email@example.com` with your actual email:
-```
-"message": "⚠️ **High CPU Alert**\n\nCPU utilization is above 80%\n\n- Host: {{host.name}}\n- Current value: {{value}}%\n\n@your-email@example.com"
-```
+## as we can see below that the Stress process is making the high CPU
 
-## Validation
+![alt text](image-7.png)
 
-### Test the Complete Setup
-```bash
-# 1. Verify agent is reporting
-sudo datadog-agent status | grep -A 5 "API Keys status"
 
-# 2. Generate CPU load
-stress --cpu $(nproc) --timeout 600s
-
-# 3. Check metrics in Datadog (wait 1-2 minutes for data)
-# Navigate to: Metrics Explorer → system.cpu.user
-
-# 4. Verify alert triggers (wait ~5 minutes during load test)
-# Check: Monitors page for alert status
-```
 
 ## Troubleshooting
 ```bash

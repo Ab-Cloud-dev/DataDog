@@ -42,7 +42,7 @@ You will:
 
 1. **Install dependencies**
 
-        sudo apt update -ysudo apt install python3 python3-pip python3-venv -y
+        sudo apt update -y && sudo apt install python3 python3-pip python3-venv -y
 2. **Create project directory**
 
         mkdir ~/sample-webapp && cd ~/sample-webapp
@@ -58,20 +58,23 @@ You will:
 
     Paste the following:
 ```
- from flask import Flask
+from flask import Flask
+import time
 app = Flask(__name__)
 
 @app.route('/')
 def home():
+    time.sleep(0.1)  # simulate latency
     return "Hello from Flask Web App monitored by Datadog!"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
 
+
 ```
 6. **Run the app**
 
-        python3 app.py
+        nohup python3 app.py > app.log 2>&1 &
 
     - Access via: `http://<EC2_PUBLIC_IP>:5000`
 ![alt text](image.png)
